@@ -2,6 +2,7 @@ login:
     email: me@example.com
     password: secretpassword
 
-data:
-    # i.e https://www.strava.com/athletes/{normand_id}
-    normand_id: 1234567
+athlete_ids:
+    # User IDs need to be between single quotes or else they will be loaded at int
+    # - '1234567'
+    # - '7654321'

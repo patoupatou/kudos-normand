@@ -9,14 +9,14 @@ import generate_comment
 #}
 
 def load_config():
-        with open('config.yml') as ymlfile:
-                cfg = yaml.load(ymlfile)
+	with open('config.yml') as ymlfile:
+		cfg = yaml.load(ymlfile)
 
-        email = cfg['login']['email']
-        password = cfg['login']['password']
-        normand_id = cfg['data']['normand_id']
+		email = cfg['login']['email']
+		password = cfg['login']['password']
+		athlete_ids = cfg['athlete_ids']
 
-        return email, password, normand_id
+		return email, password, athlete_ids
 
 def login_strava(email, password):
 	browser = mechanicalsoup.Browser()
@@ -55,12 +55,13 @@ def do_comment(browser, csrf_token, activity_id, comment):
 		'comment': comment,
 		'mentions': {}
 	}
+	print(comment_data)
 	result = browser.post(comment_url, headers=headers, json=comment_data)
 	assert result.status_code == 200
 
 if __name__ == "__main__":
 
-	email, password, normand_id = load_config()
+	email, password, athlete_ids = load_config()
 
 	browser, csrf_token, feed_page = login_strava(email, password)
 
@@ -71,14 +72,17 @@ if __name__ == "__main__":
 		if len(avatars) > 0:
 			avatar = avatars[0]
 			profile_link = avatar['href']
+			athlete_id = profile_link[len('/athletes/'):]
 
-			if profile_link == '/athletes/{}'.format(normand_id):
+			if athlete_id in athlete_ids:
+				print('Found one!')
 				kudo_btn = activity.select('button.btn-kudo')[0]
 				kudo_img = kudo_btn.select('span.icon-kudo')[0]
 
 				activity_url = activity.select('a.activity-map')[0]['href']
 				activity_url = 'http://www.strava.com{}'.format(activity_url)
 				activity_id = activity['id'].split('-')[1]
+				print(kudo_img)
 
 				if 'icon-dark' in kudo_img['class']:
 					print('Kudoing {}'.format(activity_url))
